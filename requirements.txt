@@ -1,0 +1,21 @@
+# Data & numerical computing
+pandas~=2.2.2
+numpy~=1.26.4
+scipy~=1.13.1
+
+# Market data
+yfinance~=0.2.40
+
+# Visualization
+matplotlib~=3.8.4
+seaborn~=0.13.2
+
+# Notebooks
+jupyter~=1.0.0
+ipykernel~=6.29.4
+
+# Table/report export
+openpyxl~=3.1.2
+
+# Testing
+pytest~=8.2.0

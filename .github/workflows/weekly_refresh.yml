@@ -1,0 +1,136 @@
+name: Weekly Portfolio Analytics Refresh
+
+on:
+  schedule:
+    # 06:00 UTC every Saturday (= 11:30 AM IST Saturday). NYSE closes Friday
+    # 4:00 PM ET, which is 20:00 UTC (EDT) or 21:00 UTC (EST) - 06:00 UTC
+    # Saturday is safely 9-10 hours after close year-round, giving Yahoo
+    # Finance time to settle end-of-day data, without a DST-dependent cron.
+    - cron: '0 6 * * 6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: weekly-portfolio-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run automated test suite
+        run: python -m pytest tests -v
+
+      - name: Clear cached price data to force a real refresh
+        # main.py's data_loader prefers the cached CSV when present, which
+        # would otherwise be the just-checked-out, previously-committed file
+        # every single run. Deleting it here guarantees load_price_data()
+        # raises FileNotFoundError so the existing download/retry/validation
+        # pipeline (run_data_pipeline()) actually runs every scheduled week.
+        run: rm -f data/raw/market_data_raw.csv data/processed/adjusted_close.csv
+
+      - name: Run analytics pipeline (main.py)
+        run: python main.py
+
+      - name: Validate expected generated files exist
+        run: |
+          set -e
+          required_files=(
+            "data/processed/adjusted_close.csv"
+            "output/tables/asset_metrics.csv"
+            "output/tables/portfolio_summary.csv"
+            "output/tables/portfolio_vs_sp500.csv"
+            "output/tables/risk_contribution.csv"
+            "output/tables/signal_summary.csv"
+            "output/tables/backtest_summary.csv"
+            "output/tables/monte_carlo_summary.csv"
+            "output/reports/analysis_summary.txt"
+            "output/charts/portfolio_vs_sp500.png"
+            "output/charts/correlation_heatmap.png"
+            "output/charts/risk_return_scatter.png"
+            "output/charts/portfolio_drawdown.png"
+            "output/charts/risk_contribution.png"
+            "output/charts/nvda_moving_average_signals.png"
+            "output/charts/monte_carlo_paths.png"
+            "output/charts/terminal_return_distribution.png"
+          )
+          missing=0
+          for f in "${required_files[@]}"; do
+            if [ ! -s "$f" ]; then
+              echo "::error::Missing or empty required generated file: $f"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then
+            echo "One or more required generated files are missing or empty - aborting before commit."
+            exit 1
+          fi
+          echo "All required generated files are present and non-empty."
+
+      - name: Validate data freshness
+        # Independent, automation-only check (does not import or modify any
+        # src/ module) that the refreshed cache is recent. The workflow runs
+        # Saturday after Friday's US session, so the latest observation
+        # should normally be Friday (1 day old). The ~4-calendar-day
+        # tolerance absorbs US market holidays (e.g. a Friday holiday
+        # pushing the latest session back to Thursday, or an occasional
+        # multi-day holiday weekend) without being so loose that genuinely
+        # stale data would silently pass.
+        run: |
+          python - <<'PY'
+          import sys
+          from datetime import datetime, timezone
+
+          import pandas as pd
+
+          MAX_AGE_DAYS = 4
+          DATA_PATH = "data/processed/adjusted_close.csv"
+
+          prices = pd.read_csv(DATA_PATH, index_col=0, parse_dates=True)
+          latest_date = prices.index.max().date()
+          today = datetime.now(timezone.utc).date()
+          age_days = (today - latest_date).days
+
+          print(f"Latest cached observation date: {latest_date}")
+          print(f"Workflow run date (UTC):        {today}")
+          print(f"Age of latest observation:      {age_days} day(s)")
+          print(f"Freshness tolerance:             {MAX_AGE_DAYS} day(s)")
+
+          if age_days > MAX_AGE_DAYS:
+              print(
+                  f"::error::Latest data observation ({latest_date}) is {age_days} day(s) old, "
+                  f"which exceeds the {MAX_AGE_DAYS}-day freshness tolerance. "
+                  "Aborting before commit - generated outputs will not be published."
+              )
+              sys.exit(1)
+
+          print(f"Data freshness check passed ({age_days} day(s) <= {MAX_AGE_DAYS}-day tolerance).")
+          PY
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push refreshed outputs (only if something changed)
+        run: |
+          git add data/processed/adjusted_close.csv output/tables output/charts output/reports
+          if git diff --cached --quiet; then
+            echo "No changes to generated outputs - nothing to commit."
+          else
+            git commit -m "chore: weekly portfolio analytics refresh"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
