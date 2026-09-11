@@ -1,0 +1,414 @@
+/*
+ * Page scaffolding: the fixed navigation bar, full-bleed ruled sections, the
+ * split grids inside them, and the dot-matrix ground treatment.
+ *
+ * Sections are separated by full-bleed hairlines and large vertical space
+ * rather than by boxes. Nothing here is a card: panels are delimited by a
+ * single rule and the space around them.
+ *
+ * The dot-matrix plane is generated in CSS — a tiled radial-gradient given
+ * perspective — so the reference's signature texture costs no bytes and no
+ * requests.
+ */
+
+/* ---- navigation ---------------------------------------------------------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  height: var(--nav-h);
+  background: rgba(5, 7, 12, 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.nav__inner {
+  max-width: var(--measure);
+  height: 100%;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex: none;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav__mark {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.nav__title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Section links: letterspaced uppercase with a rule under the active item. */
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  margin-right: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  height: 100%;
+}
+
+.nav__links::-webkit-scrollbar {
+  display: none;
+}
+
+.nav__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 1px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--t-hover) var(--ease-out);
+}
+
+.nav__link:hover {
+  color: var(--ink-primary);
+}
+
+.nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--azure);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-select) var(--ease-out);
+}
+
+.nav__link[aria-current="true"] {
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+
+.nav__link[aria-current="true"]::after {
+  transform: scaleX(1);
+}
+
+.nav__status {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex: none;
+}
+
+.nav__date {
+  font-size: 11.5px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+/* ---- page shell ---------------------------------------------------------- */
+
+.shell {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  position: relative;
+  padding-block: var(--s-9) var(--s-8);
+  border-top: 1px solid var(--rule);
+}
+
+.section:first-of-type {
+  border-top: 0;
+}
+
+.section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-6);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-7);
+}
+
+.section__headings {
+  min-width: 0;
+}
+
+.section__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+/* ---- overview ------------------------------------------------------------ */
+
+.overview {
+  position: relative;
+  padding-block: var(--s-8) var(--s-7);
+  overflow: hidden;
+}
+
+/* Graded navy field behind the opening block, echoing the reference's
+   top-left navy cast fading to near-black. */
+.overview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(
+      78% 118% at 8% -14%,
+      var(--grad-navy) 0%,
+      rgba(14, 28, 46, 0.42) 34%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--grad-deep) 0%, var(--bg-base) 78%);
+}
+
+.overview__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-7);
+  align-items: start;
+}
+
+.overview__meta {
+  margin: var(--s-7) 0 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-2) var(--s-5);
+  font-size: 13px;
+  max-width: 640px;
+}
+
+.overview__meta dt {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding-top: 3px;
+  white-space: nowrap;
+}
+
+.overview__meta dd {
+  margin: 0;
+  color: var(--ink-secondary);
+}
+
+/* ---- dot-matrix perspective plane ---------------------------------------- */
+
+/*
+ * The reference's recurring motif: a dot grid receding to a vanishing point.
+ * Built from a tiled radial-gradient on a rotated, perspective-transformed
+ * plane, masked so it fades into the ground. Decorative and inert.
+ */
+.dotplane {
+  position: absolute;
+  inset: auto 0 0;
+  height: 320px;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  perspective: 220px;
+  perspective-origin: 50% 0%;
+  opacity: 0.5;
+}
+
+.dotplane__grid {
+  position: absolute;
+  inset: -60% -30% -30%;
+  background-image: radial-gradient(
+    circle at center,
+    var(--azure-soft) 0.9px,
+    transparent 1.1px
+  );
+  background-size: 26px 26px;
+  transform: rotateX(74deg);
+  transform-origin: 50% 0%;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 26%,
+    #000 62%,
+    transparent 92%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 26%,
+    #000 62%,
+    transparent 92%
+  );
+}
+
+.dotplane--top {
+  inset: 0 0 auto;
+  height: 260px;
+  perspective-origin: 50% 100%;
+  opacity: 0.36;
+}
+
+.dotplane--top .dotplane__grid {
+  transform: rotateX(-74deg);
+  transform-origin: 50% 100%;
+}
+
+/* ---- grids --------------------------------------------------------------- */
+
+.grid {
+  display: grid;
+  gap: var(--s-6);
+}
+
+/* Track minimums wrapped in min(...) so a narrow viewport collapses to one
+   column instead of forcing the page wider than itself. */
+.grid--split {
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+}
+
+.grid--asset {
+  grid-template-columns: minmax(min(260px, 100%), 300px) minmax(0, 1fr);
+}
+
+.grid--backtest {
+  grid-template-columns: minmax(0, 1.45fr) minmax(min(280px, 100%), 1fr);
+}
+
+.grid--wide-left {
+  grid-template-columns: minmax(0, 1.35fr) minmax(min(300px, 100%), 1fr);
+}
+
+@media (max-width: 900px) {
+  .grid--asset,
+  .grid--backtest,
+  .grid--wide-left {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* A panel is a titled region, not a box: one rule above it and space. */
+.panel {
+  min-width: 0;
+}
+
+.panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rule);
+}
+
+.panel--ruled {
+  padding-left: var(--s-6);
+  border-left: 1px solid var(--rule);
+}
+
+@media (max-width: 900px) {
+  .panel--ruled {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.stack {
+  display: grid;
+  gap: var(--s-7);
+}
+
+/* ---- footer -------------------------------------------------------------- */
+
+.footer {
+  border-top: 1px solid var(--rule);
+  padding-block: var(--s-6) var(--s-8);
+  color: var(--ink-tertiary);
+  font-size: 12.5px;
+}
+
+.footer__disclaimer {
+  margin: 0;
+  max-width: 78ch;
+  color: var(--ink-secondary);
+}
+
+.footer__provenance {
+  margin: var(--s-4) 0 0;
+  display: flex;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+}
+
+/* ---- responsive ---------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .overview__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .nav__title {
+    display: none;
+  }
+
+  .nav__date {
+    display: none;
+  }
+
+  .nav__inner {
+    gap: var(--s-4);
+  }
+}
+
+@media (max-width: 620px) {
+  .section {
+    padding-block: var(--s-8) var(--s-7);
+  }
+
+  .section__head {
+    margin-bottom: var(--s-6);
+  }
+
+  .overview__meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-1) 0;
+  }
+
+  .overview__meta dd {
+    margin-bottom: var(--s-3);
+  }
+
+  .dotplane {
+    height: 200px;
+  }
+}

@@ -1,0 +1,1295 @@
+/*
+ * Components: the KPI rail, controls, chart chrome, tables, the asset
+ * explorer, the methodology disclosure, and state surfaces.
+ *
+ * Two rules govern everything here:
+ *   1. No cards. Regions are delimited by hairlines and space.
+ *   2. The tooltip is the only elevated surface in the interface.
+ */
+
+/* ==========================================================================
+   KPI rail — a ruled three-row table, not five floating cards
+   ========================================================================== */
+
+.kpis {
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule);
+}
+
+.kpis__row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.kpis__row--bench {
+  border-top: 1px dashed var(--rule);
+}
+
+.kpis__row--delta {
+  border-top: 1px solid var(--rule);
+}
+
+.kpi {
+  padding: var(--s-5) var(--s-4) var(--s-5) 0;
+  border-right: 1px solid var(--rule);
+  min-width: 0;
+  transition: background-color var(--t-hover) var(--ease-out);
+}
+
+.kpi:last-child {
+  border-right: 0;
+}
+
+.kpis__row--bench .kpi,
+.kpis__row--delta .kpi {
+  padding-block: var(--s-3);
+}
+
+.kpi__label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  margin-bottom: var(--s-3);
+}
+
+.kpi__value {
+  display: block;
+  font-size: clamp(30px, 3.2vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink-primary);
+}
+
+.kpi__value--pos {
+  color: var(--positive);
+}
+
+.kpi__value--neg {
+  color: var(--negative);
+}
+
+/* Present in every cell of a row so all six values share one baseline; only
+   the first column carries visible text. */
+.kpi__rowlabel {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-quaternary);
+  margin-bottom: var(--s-2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.kpi__bench {
+  display: block;
+  font-size: 15px;
+  color: var(--ink-secondary);
+}
+
+.kpi__delta {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-tertiary);
+}
+
+/* The semantic classes are declared in tokens.css, which loads first, so at
+   equal specificity .kpi__delta would win. State them explicitly here so a
+   favorable or unfavorable difference actually reads as one. */
+.kpi__delta.pos {
+  color: var(--positive);
+}
+
+.kpi__delta.neg {
+  color: var(--negative);
+}
+
+.kpi__delta.muted {
+  color: var(--ink-quaternary);
+}
+
+.kpi__caveat {
+  display: block;
+  padding: var(--s-3) 0 0;
+  font-size: 12px;
+  color: var(--caution);
+}
+
+/* Compact KPI layout for narrow screens.
+   The desktop rail is a three-row table read down each column, which stops
+   working once the columns are too narrow. Below 1080px each metric becomes
+   its own ruled block carrying its value, the benchmark figure and the
+   difference together, so the comparison stays intact instead of splitting
+   into three disconnected rows. */
+.kpis-compact {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .kpis {
+    display: none;
+  }
+
+  .kpis-compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(168px, 100%), 1fr));
+    border-top: 1px solid var(--rule-strong);
+  }
+
+  .kpi-block {
+    padding: var(--s-4) var(--s-4) var(--s-4) 0;
+    border-bottom: 1px solid var(--rule);
+    min-width: 0;
+  }
+
+  .kpi-block__label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-bottom: var(--s-2);
+  }
+
+  .kpi-block__value {
+    display: block;
+    font-size: 27px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .kpi-block__value--pos {
+    color: var(--positive);
+  }
+
+  .kpi-block__value--neg {
+    color: var(--negative);
+  }
+
+  /* Stacked rather than side by side: at this width a flex row makes the
+     benchmark figure wrap away from its own label. */
+  .kpi-block__compare {
+    display: grid;
+    gap: 1px;
+    margin-top: var(--s-3);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+  }
+
+  .kpi-block__compare b {
+    font-weight: 600;
+    margin-left: 4px;
+  }
+}
+
+/* ==========================================================================
+   Controls
+   ========================================================================== */
+
+/* Range selector and mode switches: text with a rule under the active item. */
+.switch {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--rule);
+}
+
+.switch__btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-tertiary);
+  padding: 7px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color var(--t-hover) var(--ease-out),
+    background-color var(--t-hover) var(--ease-out);
+}
+
+.switch__btn + .switch__btn {
+  border-left: 1px solid var(--rule);
+}
+
+.switch__btn:hover {
+  color: var(--ink-primary);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.switch__btn[aria-selected="true"] {
+  color: var(--ink-primary);
+  background: var(--azure-wash);
+}
+
+.switch__btn[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  background: var(--azure);
+}
+
+/* Series toggle: a checkbox in the visual language of a legend key. */
+.serie {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 4px 2px;
+  font-size: 12px;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  transition: color var(--t-hover) var(--ease-out);
+}
+
+.serie:hover {
+  color: var(--ink-primary);
+}
+
+.serie__key {
+  width: 16px;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.3;
+  flex: none;
+  transition: opacity var(--t-hover) var(--ease-out);
+}
+
+.serie__key--dash {
+  background: repeating-linear-gradient(
+    to right,
+    currentColor 0 5px,
+    transparent 5px 9px
+  );
+}
+
+.serie[aria-pressed="true"] {
+  color: var(--ink-primary);
+}
+
+.serie[aria-pressed="true"] .serie__key {
+  opacity: 1;
+}
+
+.serie--portfolio {
+  color: var(--s-portfolio);
+}
+.serie--benchmark {
+  color: var(--s-benchmark);
+}
+.serie--short {
+  color: var(--azure-bright);
+}
+.serie--long {
+  color: var(--s-benchmark);
+}
+
+/* Ticker tabs — the primary asset selector. */
+.tickers {
+  display: flex;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ticker-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0 0 var(--s-3);
+  margin-bottom: -1px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  transition: color var(--t-hover) var(--ease-out);
+}
+
+.ticker-tab:hover {
+  color: var(--ink-primary);
+}
+
+.ticker-tab::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: var(--tint, var(--azure));
+  transform: scaleX(0);
+  transition: transform var(--t-select) var(--ease-out);
+}
+
+.ticker-tab[aria-selected="true"] {
+  color: var(--ink-primary);
+}
+
+.ticker-tab[aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.ticker-tab__dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: var(--tint, var(--ink-tertiary));
+}
+
+/* Status pill — the one place a rounded shape is allowed, because it reads as
+   an indicator rather than a container. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.pill--ok {
+  color: var(--positive);
+  border-color: rgba(47, 182, 124, 0.3);
+  background: rgba(47, 182, 124, 0.09);
+}
+
+.pill--stale {
+  color: var(--caution);
+  border-color: rgba(217, 161, 59, 0.32);
+  background: rgba(217, 161, 59, 0.1);
+}
+
+.pill--error {
+  color: var(--negative);
+  border-color: rgba(229, 72, 77, 0.32);
+  background: rgba(229, 72, 77, 0.1);
+}
+
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-tertiary);
+}
+
+.tag--bull {
+  color: var(--positive);
+  border-color: rgba(47, 182, 124, 0.34);
+}
+
+.tag--bear {
+  color: var(--negative);
+  border-color: rgba(229, 72, 77, 0.34);
+}
+
+/* ==========================================================================
+   Charts
+   ========================================================================== */
+
+.chart {
+  position: relative;
+  width: 100%;
+}
+
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart__canvas {
+  display: block;
+  width: 100%;
+}
+
+/* Horizontal gridlines only; no axis spine, no vertical grid. */
+.axis text {
+  fill: var(--ink-quaternary);
+  font-size: 10.5px;
+  font-family: var(--font-ui);
+}
+
+.gridline {
+  stroke: var(--rule);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.gridline--parity {
+  stroke: var(--rule-strong);
+  stroke-dasharray: 2 3;
+}
+
+.series {
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.series--benchmark {
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.series--thin {
+  stroke-width: 1.4;
+}
+
+/* One-shot reveal: the line draws itself the first time it is seen. */
+.series--draw {
+  stroke-dasharray: var(--len) var(--len);
+  stroke-dashoffset: var(--len);
+  animation: draw var(--t-draw) var(--ease-out) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.crosshair {
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.marker {
+  stroke: var(--bg-base);
+  stroke-width: 2;
+}
+
+.chart__legend {
+  display: flex;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  margin-top: var(--s-4);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--ink-tertiary);
+}
+
+.chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.chart__legend-key {
+  width: 16px;
+  height: 2px;
+  background: currentColor;
+  flex: none;
+}
+
+.chart__legend-key--dash {
+  background: repeating-linear-gradient(
+    to right,
+    currentColor 0 5px,
+    transparent 5px 9px
+  );
+}
+
+/* ---- tooltip: the only elevated surface --------------------------------- */
+
+.tt {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  min-width: 168px;
+  max-width: 300px;
+  padding: var(--s-3);
+  background: rgba(11, 15, 24, 0.97);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 18px 48px -16px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity var(--t-tip) var(--ease-out),
+    transform var(--t-tip) var(--ease-out);
+  font-size: 12px;
+}
+
+.tt[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tt__head {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-quaternary);
+  padding-bottom: var(--s-2);
+  margin-bottom: var(--s-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.tt__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: 2px 0;
+}
+
+.tt__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--ink-secondary);
+}
+
+.tt__swatch {
+  width: 10px;
+  height: 2px;
+  flex: none;
+}
+
+.tt__val {
+  font-weight: 600;
+}
+
+.tt__note {
+  margin-top: var(--s-2);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--rule);
+  color: var(--ink-quaternary);
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   Weight vs risk contribution
+   ========================================================================== */
+
+.wrisk {
+  display: grid;
+  gap: 0;
+}
+
+.wrisk__row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--t-hover) var(--ease-out);
+}
+
+.wrisk__row:hover {
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.wrisk__row[aria-selected="true"] {
+  background: var(--azure-wash);
+}
+
+.wrisk__ticker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.wrisk__dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+}
+
+.wrisk__bars {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.wrisk__track {
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.wrisk__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  transition: width var(--t-range) var(--ease-out);
+}
+
+.wrisk__fill--weight {
+  background: var(--ink-quaternary);
+}
+
+.wrisk__fill--risk {
+  background: var(--azure);
+}
+
+.wrisk__readout {
+  text-align: right;
+  font-size: 12px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+.wrisk__gap {
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Correlation matrix
+   ========================================================================== */
+
+.heat {
+  display: grid;
+  gap: 2px;
+  font-size: 11px;
+  min-width: 0;
+}
+
+.heat__cell {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+  transition: outline-color var(--t-hover) var(--ease-out);
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+
+.heat__cell--diag {
+  color: var(--ink-quaternary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.heat__cell--linked {
+  outline-color: var(--rule-strong);
+}
+
+.heat__head {
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-quaternary);
+}
+
+.heat__head--row {
+  justify-content: flex-end;
+  padding-right: var(--s-2);
+}
+
+.heat__scale {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+  font-size: 11px;
+  color: var(--ink-quaternary);
+}
+
+.heat__ramp {
+  height: 6px;
+  flex: 1;
+  min-width: 80px;
+  background: linear-gradient(
+    to right,
+    rgba(229, 72, 77, 0.7),
+    rgba(255, 255, 255, 0.06),
+    rgba(10, 132, 255, 0.7)
+  );
+}
+
+/* ==========================================================================
+   Asset explorer
+   ========================================================================== */
+
+.asset {
+  display: grid;
+  gap: var(--s-5);
+  align-content: start;
+}
+
+.asset__name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.asset__swatch {
+  width: 10px;
+  height: 22px;
+  flex: none;
+}
+
+.asset__state {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--ink-tertiary);
+}
+
+/* Metric list as a ruled two-column table. */
+.metrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.metrics > div {
+  display: contents;
+}
+
+.metrics dt {
+  padding: var(--s-3) var(--s-4) var(--s-3) 0;
+  font-size: 12.5px;
+  color: var(--ink-tertiary);
+  border-top: 1px solid var(--rule);
+}
+
+.metrics dd {
+  margin: 0;
+  padding: var(--s-3) 0;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  border-top: 1px solid var(--rule);
+}
+
+.metrics--grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+  gap: 0 var(--s-6);
+}
+
+.metrics--grid > div {
+  display: block;
+  border-top: 1px solid var(--rule);
+  padding: var(--s-4) 0;
+}
+
+.metrics--grid dt {
+  border: 0;
+  padding: 0 0 var(--s-2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.metrics--grid dd {
+  border: 0;
+  padding: 0;
+  text-align: left;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+
+.table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 720px;
+}
+
+table.data caption {
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--ink-tertiary);
+  padding-bottom: var(--s-4);
+}
+
+table.data th,
+table.data td {
+  padding: var(--s-3) var(--s-4);
+  text-align: right;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+table.data th:first-child,
+table.data td:first-child {
+  text-align: left;
+  padding-left: 0;
+  position: sticky;
+  left: 0;
+  background: var(--bg-base);
+}
+
+table.data td:last-child,
+table.data th:last-child {
+  padding-right: 0;
+  text-align: left;
+}
+
+table.data thead th {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  border-bottom: 1px solid var(--rule-strong);
+  position: relative;
+}
+
+/* Sortable headers */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--t-hover) var(--ease-out);
+}
+
+th.sortable:hover {
+  color: var(--ink-primary);
+}
+
+th.sortable::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 6px;
+  vertical-align: 2px;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-bottom: 4px solid currentColor;
+  opacity: 0.22;
+  transition: opacity var(--t-hover), transform var(--t-hover);
+}
+
+th.sortable[aria-sort="descending"]::after {
+  transform: rotate(180deg);
+}
+
+th.sortable[aria-sort="ascending"]::after,
+th.sortable[aria-sort="descending"]::after {
+  opacity: 1;
+  color: var(--azure-bright);
+}
+
+table.data tbody tr {
+  cursor: pointer;
+  transition: background-color var(--t-hover) var(--ease-out);
+}
+
+table.data tbody tr:hover {
+  background: rgba(255, 255, 255, 0.022);
+}
+
+table.data tbody tr[aria-selected="true"] {
+  background: var(--azure-wash);
+}
+
+table.data tbody tr[aria-selected="true"] td:first-child {
+  box-shadow: inset 2px 0 0 var(--azure);
+  background: var(--bg-inset);
+}
+
+.cell-ticker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: 600;
+}
+
+.cell-ticker__dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+}
+
+/* Stacked table for small screens */
+.data-cards {
+  display: none;
+  gap: 0;
+}
+
+.data-card {
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s-4) 0;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.data-card[aria-selected="true"] {
+  background: var(--azure-wash);
+}
+
+.data-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+
+.data-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-2) var(--s-4);
+  font-size: 12.5px;
+}
+
+.data-card__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  color: var(--ink-tertiary);
+}
+
+.data-card__item b {
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .table-wrap {
+    display: none;
+  }
+
+  .data-cards {
+    display: grid;
+  }
+}
+
+/* ==========================================================================
+   Crossover timeline
+   ========================================================================== */
+
+.timeline {
+  padding-block: var(--s-5) 0;
+}
+
+.timeline__track {
+  position: relative;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+.timeline__event {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: transform var(--t-hover) var(--ease-out),
+    opacity var(--t-select) var(--ease-out);
+}
+
+.timeline__event:hover,
+.timeline__event:focus-visible {
+  transform: scale(1.5);
+  z-index: 2;
+}
+
+.timeline__event--golden {
+  background: var(--positive);
+}
+
+.timeline__event--death {
+  background: var(--negative);
+}
+
+.timeline__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--s-4);
+  font-size: 10.5px;
+  color: var(--ink-quaternary);
+}
+
+/* ==========================================================================
+   Monte Carlo stat rail
+   ========================================================================== */
+
+.statrail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+  border-top: 1px solid var(--rule-strong);
+  margin-top: var(--s-5);
+}
+
+.statrail__item {
+  padding: var(--s-4) var(--s-4) var(--s-4) 0;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.statrail__item:last-child {
+  border-right: 0;
+}
+
+.statrail__label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  margin-bottom: var(--s-2);
+}
+
+.statrail__value {
+  display: block;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The framing line for the simulation — required wording, given prominence. */
+.framing {
+  display: inline-block;
+  margin-top: var(--s-4);
+  padding: var(--s-2) var(--s-4);
+  border-left: 2px solid var(--caution);
+  background: rgba(217, 161, 59, 0.07);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--caution);
+}
+
+.downside {
+  display: grid;
+  gap: 0;
+}
+
+.downside__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+
+.downside__row span:first-child {
+  color: var(--ink-tertiary);
+}
+
+.downside__row b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Methodology disclosure
+   ========================================================================== */
+
+.method {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.method details {
+  border-bottom: 1px solid var(--rule);
+}
+
+.method summary {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-primary);
+  transition: color var(--t-hover) var(--ease-out);
+}
+
+.method summary::-webkit-details-marker {
+  display: none;
+}
+
+.method summary:hover {
+  color: var(--azure-bright);
+}
+
+.method summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  flex: none;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--ink-quaternary);
+  transition: transform var(--t-select) var(--ease-out);
+}
+
+.method details[open] summary::before {
+  transform: rotate(90deg);
+  border-left-color: var(--azure);
+}
+
+.method__body {
+  padding: 0 0 var(--s-5) var(--s-5);
+  color: var(--ink-secondary);
+  font-size: 13.5px;
+  max-width: 82ch;
+}
+
+.method__body p {
+  margin: 0 0 var(--s-3);
+}
+
+.method__body p:last-child {
+  margin-bottom: 0;
+}
+
+.method__body code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--ink-primary);
+}
+
+/* ==========================================================================
+   Reveal — one-shot, on scroll-in
+   ========================================================================== */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--t-reveal) var(--ease-out),
+    transform var(--t-reveal) var(--ease-out);
+}
+
+.reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .series--draw {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   State surfaces
+   ========================================================================== */
+
+.state {
+  display: grid;
+  place-items: center;
+  gap: var(--s-4);
+  min-height: 60vh;
+  padding: var(--s-7) var(--gutter);
+  text-align: center;
+  color: var(--ink-tertiary);
+  font-size: 13.5px;
+}
+
+.state p {
+  margin: 0;
+  max-width: 58ch;
+}
+
+.state__spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--rule-strong);
+  border-top-color: var(--azure);
+  border-radius: 50%;
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.state--error strong {
+  display: block;
+  color: var(--negative);
+  font-size: 16px;
+  margin-bottom: var(--s-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state__spinner {
+    animation-duration: 2s;
+  }
+}

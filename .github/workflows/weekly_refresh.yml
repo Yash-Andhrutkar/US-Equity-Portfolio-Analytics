@@ -17,6 +17,12 @@ permissions:
   contents: write
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Refresh: download fresh data, run the analytics, export and validate the
+  # dashboard payload, then commit. Every gate in this job runs BEFORE the
+  # commit step, so a failure leaves the repository - and therefore the live
+  # GitHub Pages deployment - exactly as it was.
+  # ---------------------------------------------------------------------------
   refresh:
     runs-on: ubuntu-latest
     steps:
@@ -120,6 +126,38 @@ jobs:
           print(f"Data freshness check passed ({age_days} day(s) <= {MAX_AGE_DAYS}-day tolerance).")
           PY
 
+      # --- dashboard payload ---------------------------------------------------
+
+      - name: Export dashboard data
+        # Serializes the analytics modules' output into the single JSON payload
+        # the dashboard reads. Adds no financial formulas of its own.
+        run: python scripts/export_dashboard_data.py
+
+      - name: Validate dashboard data against the analytics tables
+        # Re-reads output/tables/*.csv independently of the exporter and
+        # asserts the payload agrees with them value for value, so a silently
+        # wrong export fails here rather than being published.
+        run: python scripts/validate_dashboard_data.py
+
+      - name: Verify the dashboard has no hardcoded financial values
+        # Enforces that every figure on the page comes from the payload.
+        run: python scripts/check_no_hardcoded_numbers.py
+
+      - name: Confirm the dashboard payload exists before publishing
+        run: |
+          set -e
+          if [ ! -s docs/data/dashboard_data.json ]; then
+            echo "::error::docs/data/dashboard_data.json is missing or empty - aborting before commit."
+            exit 1
+          fi
+          if [ ! -s docs/index.html ]; then
+            echo "::error::docs/index.html is missing - aborting before commit."
+            exit 1
+          fi
+          echo "Dashboard payload: $(du -h docs/data/dashboard_data.json | cut -f1)"
+
+      # --- commit --------------------------------------------------------------
+
       - name: Configure git identity
         run: |
           git config user.name "github-actions[bot]"
@@ -128,9 +166,45 @@ jobs:
       - name: Commit and push refreshed outputs (only if something changed)
         run: |
           git add data/processed/adjusted_close.csv output/tables output/charts output/reports
+          git add docs/data/dashboard_data.json
           if git diff --cached --quiet; then
             echo "No changes to generated outputs - nothing to commit."
           else
             git commit -m "chore: weekly portfolio analytics refresh"
             git push origin HEAD:${{ github.ref_name }}
           fi
+
+      - name: Upload dashboard as a Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  # ---------------------------------------------------------------------------
+  # Deploy: publish the dashboard to GitHub Pages.
+  #
+  # This job depends on `refresh`, so if ANY gate above fails - tests, missing
+  # outputs, stale data, a payload that disagrees with the analytics tables, or
+  # a hardcoded number in the front end - this job never runs and the last
+  # successful deployment stays live and untouched. There is no state in which
+  # a half-built dashboard reaches the public URL.
+  # ---------------------------------------------------------------------------
+  deploy:
+    needs: refresh
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

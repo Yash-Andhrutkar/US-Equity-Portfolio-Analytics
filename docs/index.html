@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>US Equity Portfolio Analytics</title>
+    <meta
+      name="description"
+      content="Risk and performance analytics for a five-holding US equity portfolio, measured against the S&P 500 and refreshed weekly by an automated Python pipeline."
+    />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#05070c" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="US Equity Portfolio Analytics" />
+    <meta
+      property="og:description"
+      content="Portfolio risk decomposition, moving-average signals, strategy backtest and Monte Carlo scenario analysis — refreshed weekly from an automated Python pipeline."
+    />
+
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070c'/%3E%3Cpath d='M4 24 L11 17 L17 20 L28 8' fill='none' stroke='%230a84ff' stroke-width='2.4'/%3E%3Ccircle cx='28' cy='8' r='2.6' fill='%230a84ff'/%3E%3C/svg%3E"
+    />
+
+    <link
+      rel="preload"
+      href="assets/fonts/inter-variable-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#performance">Skip to the analytics</a>
+
+    <!-- ============================ NAVIGATION ============================ -->
+    <header class="nav">
+      <div class="nav__inner">
+        <a class="nav__brand" href="#top">
+          <svg class="nav__mark" viewBox="0 0 32 32" aria-hidden="true">
+            <path
+              d="M3 25 L11 17 L17 20 L29 7"
+              fill="none"
+              stroke="var(--azure)"
+              stroke-width="2.6"
+            />
+            <circle cx="29" cy="7" r="2.6" fill="var(--azure)" />
+          </svg>
+          <span class="nav__title">US Equity Portfolio Analytics</span>
+        </a>
+
+        <nav class="nav__links" aria-label="Dashboard sections">
+          <a class="nav__link" href="#overview" data-navlink="overview">Overview</a>
+          <a class="nav__link" href="#performance" data-navlink="performance">Performance</a>
+          <a class="nav__link" href="#risk" data-navlink="risk">Allocation &amp; Risk</a>
+          <a class="nav__link" href="#assets" data-navlink="assets">Assets</a>
+          <a class="nav__link" href="#signals" data-navlink="signals">Signals</a>
+          <a class="nav__link" href="#backtest" data-navlink="backtest">Backtest</a>
+          <a class="nav__link" href="#simulation" data-navlink="simulation">Simulation</a>
+          <a class="nav__link" href="#data" data-navlink="data">Data</a>
+          <a class="nav__link" href="#methodology" data-navlink="methodology">Method</a>
+        </nav>
+
+        <div class="nav__status">
+          <span class="nav__date num" data-nav-date>—</span>
+          <span class="pill pill--ok" data-status-pill>
+            <span class="pill__dot"></span>Loading
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <div class="state" data-loading>
+      <div class="state__spinner" aria-hidden="true"></div>
+      <p>Loading the latest analytics export…</p>
+    </div>
+
+    <main data-app hidden id="top">
+      <!-- ============================= OVERVIEW ============================= -->
+      <section class="overview" id="overview">
+        <div class="dotplane dotplane--top" aria-hidden="true">
+          <div class="dotplane__grid"></div>
+        </div>
+
+        <div class="shell">
+          <div class="overview__grid">
+            <div>
+              <p class="eyebrow">Portfolio</p>
+              <h1 class="display">
+                A five-holding US equity portfolio, measured against the
+                <span data-benchmark-label>benchmark</span>.
+              </h1>
+              <p class="lede">
+                Return, risk, concentration, trend signals and scenario
+                analysis — every figure computed in Python and republished
+                weekly by an automated pipeline. Periodically refreshed
+                end-of-day analysis, not streaming market data.
+              </p>
+
+              <dl class="overview__meta">
+                <dt>Analysis period</dt>
+                <dd data-meta-period>—</dd>
+                <dt>Latest market data</dt>
+                <dd data-meta-market>—</dd>
+                <dt>Last refresh</dt>
+                <dd data-meta-refresh>—</dd>
+                <dt>Holdings</dt>
+                <dd data-meta-weights>—</dd>
+              </dl>
+            </div>
+
+            <div
+              class="switch"
+              role="tablist"
+              aria-label="Analysis time range"
+              data-range
+            ></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== KPI RAIL ============================ -->
+      <div class="shell">
+        <div class="kpis" data-kpis role="table" aria-label="Portfolio metrics against the benchmark"></div>
+        <div class="kpis-compact" data-kpis-compact></div>
+        <p class="kpi__caveat" data-window-caveat hidden></p>
+      </div>
+
+      <!-- ============================ PERFORMANCE =========================== -->
+      <section class="section" id="performance">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">01 — Performance</p>
+              <h2 class="display">Cumulative performance against the benchmark</h2>
+              <p class="lede">
+                Cumulative return is rebased to the start of the selected
+                range. Drawdown is always measured against the running peak of
+                the full sample, so a decline that began before the range is
+                not concealed by it.
+              </p>
+            </div>
+
+            <div class="section__tools">
+              <div class="switch" role="tablist" aria-label="Performance metric" data-performance-mode>
+                <button type="button" class="switch__btn" role="tab" data-mode="cumulative" aria-selected="true">Return</button>
+                <button type="button" class="switch__btn" role="tab" data-mode="drawdown" aria-selected="false">Drawdown</button>
+              </div>
+              <button type="button" class="serie serie--portfolio" data-toggle-portfolio aria-pressed="true">
+                <span class="serie__key"></span>Portfolio
+              </button>
+              <button type="button" class="serie serie--benchmark" data-toggle-benchmark aria-pressed="true">
+                <span class="serie__key serie__key--dash"></span><span data-benchmark-label>Benchmark</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="reveal" data-chart-performance></div>
+        </div>
+      </section>
+
+      <!-- ========================= ALLOCATION & RISK ======================== -->
+      <section class="section" id="risk">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">02 — Allocation &amp; risk</p>
+              <h2 class="display">Capital weight is not risk</h2>
+              <p class="lede">
+                Capital weight is how much of the portfolio a holding occupies.
+                Risk contribution is how much of the portfolio's volatility it
+                is responsible for, accounting for its own volatility and its
+                correlation with everything else. The two are rarely equal.
+              </p>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="grid grid--wide-left">
+              <div class="panel reveal">
+                <div class="panel__head">
+                  <h3 class="panel-title">Weight vs risk contribution</h3>
+                  <span class="label" data-wrisk-scale></span>
+                </div>
+                <div data-wrisk></div>
+                <p class="note" data-wrisk-note></p>
+              </div>
+
+              <div class="panel panel--ruled reveal">
+                <div class="panel__head">
+                  <h3 class="panel-title">Risk / return</h3>
+                </div>
+                <div data-scatter></div>
+                <p class="note">
+                  Mark area is proportional to capital weight. The portfolio and
+                  <span data-benchmark-label>benchmark</span> are drawn as rings.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid--split">
+              <div class="panel reveal">
+                <div class="panel__head">
+                  <h3 class="panel-title">Correlation matrix</h3>
+                  <span class="label">Daily returns</span>
+                </div>
+                <div data-heatmap></div>
+              </div>
+
+              <div class="panel panel--ruled reveal">
+                <div class="panel__head">
+                  <h3 class="panel-title">Diversification map</h3>
+                  <span class="label">Correlation distance</span>
+                </div>
+                <div data-distance></div>
+                <p class="note">
+                  Holdings are positioned by multidimensional scaling of the
+                  correlation distance matrix, so holdings that historically
+                  moved together sit close together. Distance between two marks
+                  approximates how independently they have behaved — a standard
+                  way to read diversification structure at a glance.
+                </p>
+              </div>
+            </div>
+
+            <div class="panel reveal">
+              <div class="panel__head">
+                <h3 class="panel-title">Portfolio drawdown</h3>
+                <span class="label">Full sample</span>
+              </div>
+              <div data-chart-drawdown></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== ASSETS ============================== -->
+      <section class="section" id="assets">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">03 — Asset explorer</p>
+              <h2 class="display">Individual holdings</h2>
+              <p class="lede">
+                Selecting a holding here drives the signal chart, the backtest
+                and every highlighted mark elsewhere on the page.
+              </p>
+            </div>
+          </div>
+
+          <div class="tickers" role="tablist" aria-label="Select a holding" data-tickers></div>
+
+          <div class="grid grid--asset" style="margin-top: var(--s-6)">
+            <div class="asset reveal" data-asset-head></div>
+            <div class="panel panel--ruled reveal">
+              <dl class="metrics metrics--grid" data-asset-metrics></dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== SIGNALS ============================= -->
+      <section class="section" id="signals">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">04 — Technical signals</p>
+              <h2 class="display">
+                MA<span data-ma-short>50</span> / MA<span data-ma-long>200</span>
+                crossovers
+              </h2>
+              <p class="lede">
+                Historical trend description only. A crossover records what
+                price did, not what it will do. Moving averages are computed on
+                the full price history, because a
+                <span data-ma-long>200</span>-day average requires
+                <span data-ma-long>200</span> prior observations to exist at all.
+              </p>
+            </div>
+
+            <div class="section__tools">
+              <button type="button" class="serie serie--short" data-toggle-ma-short aria-pressed="true">
+                <span class="serie__key"></span><span>MA<span data-ma-short>50</span></span>
+              </button>
+              <button type="button" class="serie serie--long" data-toggle-ma-long aria-pressed="true">
+                <span class="serie__key"></span><span>MA<span data-ma-long>200</span></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="reveal" data-chart-signals></div>
+
+          <div class="panel" style="margin-top: var(--s-7)">
+            <div class="panel__head">
+              <h3 class="panel-title">Every crossover in the sample</h3>
+              <span class="label" data-event-count></span>
+            </div>
+            <div class="timeline" data-timeline></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================= BACKTEST ============================= -->
+      <section class="section" id="backtest">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">05 — Strategy backtest</p>
+              <h2 class="display">Buy &amp; hold against the moving-average rule</h2>
+              <p class="lede">
+                Positions are shifted one trading day before being applied to
+                returns, so no future information enters the result. No
+                transaction costs, slippage or taxes are modelled. The rule
+                reduces drawdown on some holdings and gives up return on
+                others — it is not superior in general.
+              </p>
+            </div>
+
+            <div class="section__tools">
+              <div class="switch" role="tablist" aria-label="Backtest series" data-backtest-mode>
+                <button type="button" class="switch__btn" role="tab" data-mode="both" aria-selected="true">Both</button>
+                <button type="button" class="switch__btn" role="tab" data-mode="buy_hold" aria-selected="false">Buy &amp; hold</button>
+                <button type="button" class="switch__btn" role="tab" data-mode="strategy" aria-selected="false">Strategy</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid--backtest">
+            <div class="panel reveal">
+              <div class="panel__head">
+                <h3 class="panel-title">Growth of one dollar</h3>
+                <span class="label">Shaded = out of market</span>
+              </div>
+              <div data-chart-backtest></div>
+            </div>
+
+            <div class="panel panel--ruled reveal">
+              <div class="panel__head">
+                <h3 class="panel-title" data-backtest-title>Comparison</h3>
+              </div>
+              <dl class="metrics" data-backtest-metrics></dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ SIMULATION ============================ -->
+      <section class="section" id="simulation">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">06 — Monte Carlo</p>
+              <h2 class="display">
+                <span data-sim-count>10,000</span> simulated one-year scenarios
+              </h2>
+              <p class="lede">
+                Daily portfolio returns are drawn from a normal distribution
+                parameterized by the portfolio's historical daily mean and
+                volatility, then compounded over
+                <span data-sim-days>252</span> trading days. Real markets
+                exhibit fat tails, volatility clustering and regime changes that
+                this does not capture, so extreme outcomes are
+                under-represented.
+              </p>
+              <p class="framing">
+                Historical-Parameter Scenario Simulation — Not a Forecast
+              </p>
+            </div>
+          </div>
+
+          <div class="panel reveal">
+            <div class="panel__head">
+              <h3 class="panel-title">Percentile fan</h3>
+              <span class="label">Move across to read any horizon</span>
+            </div>
+            <div data-chart-mc></div>
+          </div>
+
+          <div class="statrail" data-mc-stats></div>
+
+          <div class="grid grid--split" style="margin-top: var(--s-7)">
+            <div class="panel reveal">
+              <div class="panel__head">
+                <h3 class="panel-title">Terminal return distribution</h3>
+                <span class="label">Red = below start</span>
+              </div>
+              <div data-chart-histogram></div>
+            </div>
+
+            <div class="panel panel--ruled reveal">
+              <div class="panel__head">
+                <h3 class="panel-title">Simulated loss frequency</h3>
+              </div>
+              <div class="downside" data-mc-downside></div>
+              <p class="note" data-mc-framing></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================== DATA =============================== -->
+      <section class="section" id="data">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">07 — Detailed analytics</p>
+              <h2 class="display">Per-holding metrics</h2>
+              <p class="lede">
+                Sort any column. Selecting a row selects that holding across the
+                dashboard.
+              </p>
+            </div>
+          </div>
+
+          <div class="reveal" data-analytics-table></div>
+        </div>
+      </section>
+
+      <!-- =========================== METHODOLOGY ============================ -->
+      <section class="section" id="methodology">
+        <div class="shell">
+          <div class="section__head">
+            <div class="section__headings">
+              <p class="eyebrow">08 — Methodology</p>
+              <h2 class="display">Assumptions and provenance</h2>
+              <p class="lede">
+                Everything that would change a number on this page, stated
+                explicitly.
+              </p>
+            </div>
+          </div>
+
+          <div class="method" data-methodology></div>
+
+          <footer class="footer">
+            <p class="footer__disclaimer">
+              Historical analysis and scenario simulation for portfolio
+              demonstration purposes. Results are not investment advice and
+              simulated outcomes are not forecasts of future performance.
+            </p>
+            <p class="footer__provenance">
+              <span>Analytics computed in Python</span>
+              <span>Published by GitHub Actions</span>
+              <span>Commit <span class="mono" data-commit>—</span></span>
+              <span>Schema v<span data-schema>—</span></span>
+            </p>
+          </footer>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="assets/js/main.js"></script>
+    <noscript>
+      <div class="state state--error">
+        <p>
+          <strong>JavaScript required</strong>
+          This dashboard renders its charts in the browser. The underlying
+          analysis is also available as CSV tables and a plain-text report in
+          the <span class="mono">output/</span> directory of the repository.
+        </p>
+      </div>
+    </noscript>
+  </body>
+</html>

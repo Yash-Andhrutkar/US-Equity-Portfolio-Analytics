@@ -49,3 +49,10 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/processed/adjusted_close.csv
+
+# The docs/ directory is the published GitHub Pages site and is tracked in
+# full. One of its contents is generated rather than hand-written and must
+# stay committed so Pages can serve it:
+#   docs/data/dashboard_data.json  - written by scripts/export_dashboard_data.py
+# Nothing under docs/ is ignored. This note exists so that file is not
+# mistaken for build output and removed.
