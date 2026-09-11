@@ -1,9 +1,9 @@
 Metric,Value
-Mean Terminal Return,0.4059786798511247
-Median Terminal Return,0.3665856477070678
-5th Percentile Return,-0.07242267653323489
-95th Percentile Return,1.0085642984919163
+Mean Terminal Return,0.4059786683978554
+Median Terminal Return,0.3665856453518128
+5th Percentile Return,-0.0724226354201591
+95th Percentile Return,1.0085642034166467
 Probability of Loss,0.0913
-Expected Terminal Wealth,1.4059786798511247
-5th Percentile Wealth,0.9275773234667651
-95th Percentile Wealth,2.0085642984919163
+Expected Terminal Wealth,1.4059786683978555
+5th Percentile Wealth,0.9275773645798409
+95th Percentile Wealth,2.008564203416647
