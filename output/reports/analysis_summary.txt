@@ -2,7 +2,7 @@ US EQUITY PORTFOLIO ANALYTICS - SUMMARY REPORT
 ================================================
 
 DATA PERIOD
-  2021-10-04 to 2026-10-02 (1255 trading days)
+  2021-10-11 to 2026-10-09 (1255 trading days)
 
 TICKERS
   NVDA, JPM, AMZN, LLY, XOM (Benchmark: ^GSPC)
@@ -15,15 +15,15 @@ PORTFOLIO WEIGHTS
   XOM: 15.0%
 
 PORTFOLIO PERFORMANCE
-  Annualized Return:      37.53%
-  Annualized Volatility:  23.30%
-  Sharpe Ratio:           1.44
+  Annualized Return:      37.31%
+  Annualized Volatility:  23.28%
+  Sharpe Ratio:           1.43
   Max Drawdown:           -25.78%
   Beta (vs ^GSPC):        1.19
 
 PORTFOLIO VS S&P 500
-  Portfolio:  Return 37.53%, Volatility 23.30%, Sharpe 1.44, Max Drawdown -25.78%
-  S&P 500:    Return 12.48%, Volatility 16.99%, Sharpe 0.50, Max Drawdown -25.43%
+  Portfolio:  Return 37.31%, Volatility 23.28%, Sharpe 1.43, Max Drawdown -25.78%
+  S&P 500:    Return 12.43%, Volatility 16.98%, Sharpe 0.50, Max Drawdown -25.43%
 
 RISK CONTRIBUTION
   Largest contributor to portfolio risk: NVDA (46.8% of total portfolio risk)
@@ -42,10 +42,10 @@ MONTE CARLO SIMULATION (10,000 scenarios, 252-day horizon)
   performance and should not be interpreted as predicting what the
   portfolio will actually do.
 
-  Median Terminal Return:         37.67%
-  5th Percentile Terminal Return: -6.41%
+  Median Terminal Return:         37.46%
+  5th Percentile Terminal Return: -6.53%
   Simulated Frequency of Loss:    8.6% of simulated scenarios ended below the starting value (a scenario frequency, not a real-world forecast probability)
-  95% VaR:                        6.41%
-  95% CVaR:                       14.82%
+  95% VaR:                        6.53%
+  95% CVaR:                       14.93%
 
 ================================================
