@@ -2,7 +2,7 @@ US EQUITY PORTFOLIO ANALYTICS - SUMMARY REPORT
 ================================================
 
 DATA PERIOD
-  2021-11-01 to 2026-10-30 (1255 trading days)
+  2021-11-08 to 2026-11-06 (1255 trading days)
 
 TICKERS
   NVDA, JPM, AMZN, LLY, XOM (Benchmark: ^GSPC)
@@ -15,18 +15,18 @@ PORTFOLIO WEIGHTS
   XOM: 15.0%
 
 PORTFOLIO PERFORMANCE
-  Annualized Return:      35.24%
-  Annualized Volatility:  23.24%
-  Sharpe Ratio:           1.34
+  Annualized Return:      32.58%
+  Annualized Volatility:  23.28%
+  Sharpe Ratio:           1.23
   Max Drawdown:           -25.78%
   Beta (vs ^GSPC):        1.19
 
 PORTFOLIO VS S&P 500
-  Portfolio:  Return 35.24%, Volatility 23.24%, Sharpe 1.34, Max Drawdown -25.78%
-  S&P 500:    Return 10.49%, Volatility 17.01%, Sharpe 0.38, Max Drawdown -25.43%
+  Portfolio:  Return 32.58%, Volatility 23.28%, Sharpe 1.23, Max Drawdown -25.78%
+  S&P 500:    Return 9.47%, Volatility 17.13%, Sharpe 0.32, Max Drawdown -25.43%
 
 RISK CONTRIBUTION
-  Largest contributor to portfolio risk: NVDA (46.9% of total portfolio risk)
+  Largest contributor to portfolio risk: NVDA (46.7% of total portfolio risk)
 
 MOVING-AVERAGE SIGNALS (MA50 / MA200)
   NVDA: Trend=Bullish, Last Signal=Golden Cross (2025-06-27)
@@ -42,10 +42,10 @@ MONTE CARLO SIMULATION (10,000 scenarios, 252-day horizon)
   performance and should not be interpreted as predicting what the
   portfolio will actually do.
 
-  Median Terminal Return:         35.38%
-  5th Percentile Terminal Return: -7.89%
-  Simulated Frequency of Loss:    9.6% of simulated scenarios ended below the starting value (a scenario frequency, not a real-world forecast probability)
-  95% VaR:                        7.89%
-  95% CVaR:                       16.15%
+  Median Terminal Return:         32.72%
+  5th Percentile Terminal Return: -9.76%
+  Simulated Frequency of Loss:    11.2% of simulated scenarios ended below the starting value (a scenario frequency, not a real-world forecast probability)
+  95% VaR:                        9.76%
+  95% CVaR:                       17.87%
 
 ================================================
